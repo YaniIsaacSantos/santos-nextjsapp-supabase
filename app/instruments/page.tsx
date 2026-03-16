@@ -5,30 +5,49 @@ import { Suspense } from "react";
 async function InstrumentsList() {
   const supabase = await createClient();
   
-  // Add error handling
   const { data: instruments, error } = await supabase
     .from("instruments")
     .select("*");
   
-  // Log for debugging (you'll see this in your terminal)
   console.log("Supabase response:", { instruments, error });
   
   if (error) {
     return (
-      <div style={{ color: 'red' }}>
-        <h2>Error loading instruments:</h2>
-        <pre>{JSON.stringify(error, null, 2)}</pre>
+      <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+        <h2 className="text-red-800 font-semibold mb-2">Error loading instruments:</h2>
+        <p className="text-red-600">{error.message}</p>
       </div>
     );
   }
   
   return (
-    <div>
-      <h1>Instruments</h1>
+    <div className="bg-white shadow rounded-lg p-6">
+      <h1 className="text-2xl font-bold text-gray-900 mb-6">Instruments Collection</h1>
+      
       {!instruments || instruments.length === 0 ? (
-        <p>No instruments found in the database.</p>
+        <div className="text-center py-12 bg-gray-50 rounded-lg">
+          <p className="text-gray-500">No instruments found in the database.</p>
+          <p className="text-sm text-gray-400 mt-2">Add some instruments to get started!</p>
+        </div>
       ) : (
-        <pre>{JSON.stringify(instruments, null, 2)}</pre>
+        <div className="grid gap-4">
+          {instruments.map((instrument) => (
+            <div 
+              key={instrument.id} 
+              className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow"
+            >
+              <h3 className="text-lg font-semibold text-gray-900">
+                {instrument.name || 'Unnamed Instrument'}
+              </h3>
+              {instrument.type && (
+                <p className="text-sm text-gray-600 mt-1">Type: {instrument.type}</p>
+              )}
+              {instrument.description && (
+                <p className="text-gray-700 mt-2">{instrument.description}</p>
+              )}
+            </div>
+          ))}
+        </div>
       )}
     </div>
   );
@@ -36,8 +55,23 @@ async function InstrumentsList() {
 
 export default function InstrumentsPage() {
   return (
-    <Suspense fallback={<div>Loading instruments...</div>}>
-      <InstrumentsList />
-    </Suspense>
+    <div className="min-h-screen bg-gray-100 py-8">
+      <div className="max-w-4xl mx-auto px-4">
+        <Suspense fallback={
+          <div className="bg-white shadow rounded-lg p-6">
+            <div className="animate-pulse">
+              <div className="h-8 bg-gray-200 rounded w-48 mb-6"></div>
+              <div className="space-y-4">
+                <div className="h-24 bg-gray-200 rounded"></div>
+                <div className="h-24 bg-gray-200 rounded"></div>
+                <div className="h-24 bg-gray-200 rounded"></div>
+              </div>
+            </div>
+          </div>
+        }>
+          <InstrumentsList />
+        </Suspense>
+      </div>
+    </div>
   );
 }
